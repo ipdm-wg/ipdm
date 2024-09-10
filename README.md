@@ -2,7 +2,7 @@
 
 ## Abstract
 
-The Interplanetary Data Machine (IPDM) is a revolutionary, high-performance distributed protocol designed to facilitate seamless data operations across planetary-scale networks. By leveraging advanced cryptographic techniques, novel consensus mechanisms, and optimized data structures, IPDM provides a robust foundation for the next generation of decentralized applications, with a particular focus on supporting AI systems and cross-chain operations.
+The Interplanetary Data Machine (IPDM) is a distributed protocol designed to facilitate seamless data operations across planetary-scale networks. By advanced cryptographic techniques, novel consensus mechanisms, and optimized data structures, IPDM provides a robust foundation for the next generation of decentralized applications, with a particular focus on supporting AI systems and cross-chain operations.
 
 ## Table of Contents
 

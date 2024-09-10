@@ -1,132 +1,135 @@
-# Interplanetary Data Machine (IPDM)
+# Interplanetary Data Machine (IPDM): Core Concept Specification
 
-## Abstract
+## 1. Introduction
 
-The Interplanetary Data Machine (IPDM) is a distributed protocol designed to facilitate seamless data operations across planetary-scale networks. By advanced cryptographic techniques, novel consensus mechanisms, and optimized data structures, IPDM provides a robust foundation for the next generation of decentralized applications, with a particular focus on supporting AI systems and cross-chain operations.
+The Interplanetary Data Machine (IPDM) is a distributed protocol designed to facilitate efficient data operations across planetary-scale networks. IPDM aims to provide a robust foundation for decentralized applications, focusing on high throughput, low latency, and scalability.
 
-## Table of Contents
+## 2. Core Concepts
 
-1. [Introduction](#introduction)
-2. [Architecture](#architecture)
-3. [Core Components](#core-components)
-4. [Consensus Mechanism](#consensus-mechanism)
-5. [Network Layer](#network-layer)
-6. [Data Model](#data-model)
-7. [Execution Environment](#execution-environment)
-8. [Cross-Chain Interoperability](#cross-chain-interoperability)
-9. [AI Optimization](#ai-optimization)
-10. [Security Considerations](#security-considerations)
-11. [Performance Benchmarks](#performance-benchmarks)
-12. [Future Work](#future-work)
-13. [Contributing](#contributing)
-14. [License](#license)
+### 2.1 Data Units
 
-## Introduction
+The fundamental unit in IPDM is the Data Block (DB). A Data Block is an immutable, content-addressed object that can represent any type of data. Each DB is identified by its hash, calculated using the BLAKE3 hashing algorithm.
 
-In an era of exponential data growth and increasing demand for decentralized systems, traditional data infrastructures struggle to meet the scalability, security, and interoperability requirements of modern applications. The Interplanetary Data Machine (IPDM) addresses these challenges by providing a comprehensive protocol for managing and processing data across vast, heterogeneous networks.
+Structure of a Data Block:
+```
+struct DataBlock {
+    hash: [u8; 32],      // BLAKE3 hash of the content
+    size: u64,           // Size of the content in bytes
+    content: Vec<u8>,    // Actual data content
+    metadata: Metadata,  // Additional information about the data
+}
 
-IPDM is designed with the following key objectives:
+struct Metadata {
+    timestamp: u64,
+    creator: PublicKey,
+    signature: Signature,
+    tags: Vec<String>,
+}
+```
 
-1. **Scalability**: Handle petabytes of data across millions of nodes.
-2. **Low Latency**: Achieve sub-second data retrieval and processing times.
-3. **High Throughput**: Support millions of transactions per second.
-4. **Interoperability**: Seamlessly integrate with multiple blockchain networks and AI systems.
-5. **Security**: Provide robust security guarantees through advanced cryptographic techniques.
-6. **Flexibility**: Support a wide range of data types and processing paradigms.
+### 2.2 Addressing and Routing
 
-## Architecture
+IPDM uses a Distributed Hash Table (DHT) based on Kademlia for peer discovery and data routing. Each node in the network is assigned a 256-bit NodeID, which is the BLAKE3 hash of its public key.
 
-IPDM employs a layered architecture to ensure modularity, extensibility, and separation of concerns:
+The distance between two NodeIDs is calculated using the XOR metric, which helps in efficient routing and data placement.
 
-1. **Network Layer**: Handles peer discovery, connection management, and data transmission.
-2. **Consensus Layer**: Ensures agreement on the global state across the network.
-3. **Data Layer**: Manages data storage, retrieval, and indexing.
-4. **Execution Layer**: Processes transactions and smart contracts.
-5. **API Layer**: Provides interfaces for external interactions and integrations.
+### 2.3 Network Layer
 
-Each layer is designed to be modular, allowing for easy upgrades and customizations without affecting the entire system.
+The network layer is responsible for peer discovery, connection management, and data transmission. It uses a combination of TCP for reliable data transfer and UDP for quick peer discovery and network health checks.
 
-## Core Components
+Key features:
+- Peer discovery using a bootstrap node list and Kademlia DHT
+- Connection pooling for efficient resource utilization
+- NAT traversal techniques (STUN, TURN) for connectivity in restricted networks
 
-### Data Units
+### 2.4 Data Storage and Retrieval
 
-The fundamental unit of data in IPDM is the Data Atom (DA). DAs are immutable, content-addressed objects that can represent any type of data. They are organized into Molecular Structures (MS) that define relationships and hierarchies between DAs.
+IPDM uses a distributed storage system where each node is responsible for storing a subset of the Data Blocks based on the proximity of the Data Block's hash to the node's ID.
 
-### Addressing
+Data replication is achieved through a configurable replication factor (default: 3). When storing a Data Block, it is sent to the k closest nodes to its hash in the ID space.
 
-IPDM uses a novel addressing scheme called Quantum Address Vectors (QAV). QAVs provide a unified addressing system that works across different networks and data types, enabling seamless interoperability.
+Retrieval process:
+1. Client calculates the hash of the desired data
+2. Query is routed through the DHT to the nodes closest to the hash
+3. Once a node with the data is found, the Data Block is returned to the client
 
-### State Management
+### 2.5 Consensus Mechanism
 
-The global state in IPDM is represented as a Merkle-PATRICIA trie, allowing for efficient updates and proof generation. The state is further organized into shards to improve scalability.
+IPDM employs a Proof of Replication (PoRep) consensus mechanism to ensure data availability and integrity across the network. Nodes prove that they are storing unique copies of data by performing a computation that requires access to the data.
 
-## Consensus Mechanism
+Key aspects of PoRep in IPDM:
+- Challenge-Response protocol: Verifiers issue challenges to provers to demonstrate data possession
+- Space-time proofs: Provers must show they've dedicated a certain amount of storage for a specific duration
+- Slashing conditions: Nodes failing to provide valid proofs may face penalties
 
-IPDM introduces a hybrid consensus mechanism called Adaptive Consensus (AC) that combines elements of Proof of Stake (PoS), Practical Byzantine Fault Tolerance (PBFT), and Directed Acyclic Graphs (DAG).
+### 2.6 Data Processing
 
-Key features of AC include:
+IPDM includes a basic scripting layer for data processing operations. This layer uses Wasm as its runtime, allowing for safe and efficient execution of user-defined functions on the data.
 
-- Dynamic validator selection based on stake and performance metrics
-- Parallel block production and validation for improved throughput
-- Probabilistic finality with deterministic checkpoints
-- Adaptive block time and size based on network conditions
+Example operations:
+- Filtering: Select Data Blocks based on certain criteria
+- Transformation: Modify Data Block content or metadata
+- Aggregation: Combine multiple Data Blocks into a single result
 
-## Network Layer
+### 2.7 Access Control
 
-The network layer of IPDM is built on a modified Kademlia DHT, optimized for low-latency routing and efficient data discovery. It incorporates the following enhancements:
+IPDM implements a capability-based access control system. Each Data Block can be associated with a set of capabilities that define what operations can be performed on it and by whom.
 
-- Adaptive peer selection based on network topology and performance
-- Multi-path routing for improved reliability and censorship resistance
-- Gossip protocol for rapid dissemination of network updates
-- NAT traversal and relay mechanisms for connectivity in restricted networks
+Capabilities are cryptographically signed tokens that can be delegated and revoked, providing fine-grained control over data access and manipulation.
 
-## Data Model
+## 3. Protocol Messages
 
-IPDM's data model is designed to support a wide range of data types and processing paradigms:
+IPDM defines a set of protocol messages for network communication. All messages are serialized using Protocol Buffers for efficient encoding and decoding.
 
-- **Hierarchical Data Structures**: Support for complex, nested data relationships
-- **Versioned Data**: Efficient handling of data updates and historical queries
-- **Compressed Storage**: Advanced compression techniques to minimize storage requirements
-- **Indexing**: Flexible indexing strategies for optimized query performance
-- **Access Control**: Fine-grained permissions and encryption for data privacy
+Key message types:
+- STORE: Request to store a Data Block
+- FIND_NODE: Query for nodes close to a given ID
+- FIND_VALUE: Query for a specific Data Block
+- PING: Check if a node is alive and measure RTT
+- CHALLENGE: Issue a storage proof challenge
+- PROOF: Respond to a storage proof challenge
 
-## Execution Environment
+## 4. API
 
-The IPDM execution environment is based on a WebAssembly (Wasm) runtime, providing a sandboxed, deterministic execution context for smart contracts and data processing tasks. Key features include:
+IPDM provides a simple API for interacting with the network:
 
-- Just-In-Time (JIT) compilation for improved performance
-- Gas metering for resource allocation and DoS prevention
-- Parallel execution of independent transactions
-- Support for multiple programming languages (Rust, AssemblyScript, etc.)
+```rust
+pub trait IPDM {
+    fn put(&self, data: Vec<u8>) -> Result<Hash>;
+    fn get(&self, hash: Hash) -> Result<DataBlock>;
+    fn delete(&self, hash: Hash) -> Result<()>;
+    fn process(&self, script: Vec<u8>, input: Vec<Hash>) -> Result<Hash>;
+    fn grant_capability(&self, hash: Hash, grantee: PublicKey, permissions: u32) -> Result<Capability>;
+    fn revoke_capability(&self, capability: Capability) -> Result<()>;
+}
+```
 
-## AI Optimization
+## 5. Performance Considerations
 
-IPDM incorporates several features specifically designed to support AI workloads:
+IPDM is designed with performance in mind:
+- Concurrent processing of requests using async I/O
+- Caching frequently accessed Data Blocks
+- Adaptive routing based on network conditions
+- Batch processing of small Data Blocks for improved efficiency
 
-- **Optimized Data Structures**: Tensor-friendly data layouts for efficient machine learning operations
-- **Distributed Training**: Support for federated learning and distributed model training
-- **Model Serving**: Fast inference and model deployment capabilities
-- **Privacy-Preserving Computation**: Integration with secure multi-party computation (SMPC) and homomorphic encryption techniques
+<!-- Target performance metrics:
+- Throughput: x0,000 operations per second per node
+- Latency: < x00ms for data retrieval (95th percentile)
+- Scalability: Linear scaling up to x,000 nodes -->
 
-## Security Considerations
+## 6. Security Considerations
 
-Security is a paramount concern in IPDM's design. The protocol implements several advanced security measures:
-
-- Post-quantum cryptographic primitives for long-term security
-- Formal verification of critical protocol components
-- Regular security audits and bug bounty programs
-- Robust slashing mechanisms to disincentivize malicious behavior
+- All network communications are encrypted using TLS 1.3
+- Nodes use Ed25519 key pairs for identity and signing operations
+- Regular merkle proofs of the entire data set to detect data tampering
 - Rate limiting and other DoS prevention techniques
 
-<!-- ## Performance Benchmarks
+## 7. Future Work
 
-Initial benchmarks demonstrate IPDM's exceptional performance:
+While maintaining focus on the core concepts, future development may include:
+- Improved data sharding techniques for enhanced scalability
+- Integration with existing storage systems (e.g., IPFS, Filecoin)
+- Advanced caching strategies using machine learning predictions
+- Optimizations for specific data types (e.g., time-series data, graph data)
 
-- Throughput: Up to 1 million transactions per second
-- Latency: Average confirmation time of 0.x seconds
-- Scalability: Linear scaling up to x0,000 nodes tested
-- Storage Efficiency: x0% reduction in data storage requirements compared to traditional systems
-
-(Note: Detailed benchmark methodology and results are available in the `docs/benchmarks.md` file) -->
-
----
+This specification provides a practical foundation for implementing the core concepts of IPDM. It focuses on achievable goals with current technology while leaving room for future optimizations and expansions.

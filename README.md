@@ -3,6 +3,8 @@
 
 The Interplanetary Data Machine (IPDM) is a distributed protocol designed to achieve unprecedented speeds in data retrieval and processing. IPDM aims to minimize latency and maximize throughput across planetary-scale networks. IPDM aims to provide a robust foundation for decentralized applications. This specification paper outlines the core architecture, key technologies, and potential applications of IPDM, with a focus on its ability to serve as a foundation for various use cases, including blockchain data management, distributed computing, and real-time data processing at a global scale.
 
+![data blocks](/assets/data-blocks.jpg)
+
 ## 1. Introduction
 
 In the era of big data and distributed systems, the need for efficient data retrieval and processing has never been more critical. The Interplanetary Data Machine (IPDM) emerges as a response to this need, proposing a global protocol that aims to revolutionize how data is stored, retrieved, and processed across vast networks.

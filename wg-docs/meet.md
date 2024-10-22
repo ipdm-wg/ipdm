@@ -1,5 +1,5 @@
 ##  Meeting Protocol
-
+Subscribe to our lu.ma calendar to get events updates https://lu.ma/ipdm
 ### Preparation
 
 1. Agenda published 48 hours before meeting on twitter or telegram group
